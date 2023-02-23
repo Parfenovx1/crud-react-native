@@ -144,7 +144,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.droidSafeArea}>
-      <Modal visible={Boolean(modal)}>
+      <Modal animationType="slide" transparent={true} visible={Boolean(modal)}>
         <SafeAreaView>
           <View style={[tw`flex flex-row justify-between border-b p-2 items-center`]}>
             <Text>New Item</Text>
