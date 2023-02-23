@@ -5,6 +5,8 @@ import { ListItem } from './interface';
 import tw from 'twrnc';
 
 export default function App() {
+  
+  //state initialization
 
   const [list, setList] = useState<ListItem[]>([]);
 
@@ -19,6 +21,8 @@ export default function App() {
   useEffect(() => {
     getItemList();
   }, [])
+  
+  //API requests
 
   const getItemList = () => {
     fetch("https://yourtestapi.com/api/posts/", {
@@ -135,6 +139,8 @@ export default function App() {
   const handleCloseModal = () => {
     setModal(false)
   }
+  
+  //application view
 
   return (
     <SafeAreaView style={styles.droidSafeArea}>
