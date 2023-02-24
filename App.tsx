@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, SafeAreaView, Text, View, Platform, Image, ImageSourcePropType, Dimensions, TouchableOpacity, Modal, TextInput, FlatList } from 'react-native';
 import { ListItem } from './interface';
 import tw from 'twrnc';
+import { getItems, deleteItem, saveItem } from './api/api';
 
 export default function App() {
 
@@ -21,101 +22,42 @@ export default function App() {
   //useEffect to get list of items on initial render
 
   useEffect(() => {
-    getItemList();
+    getItemsList();
   }, [])
 
   //API requests
 
-  const getItemList = () => {
-    fetch("https://yourtestapi.com/api/posts/", {
-      method: "GET"
-    }).then(res => {
-      return res.json();
-    }).then(res => {
-      console.log(res);
-      if (res) {
-        setList(res)
-      }
-    }).catch(err => {
-      console.log(err);
-    })
-  }
-
-  const handleRemove = (item: ListItem) => {
-    fetch(`https://yourtestapi.com/api/posts/${item.id}`, {
-      method: "DELETE",
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    }).then(res => {
-      return res.json();
-    }).then(res => {
-      console.log(res);
-      getItemList();
-    }).catch(err => {
-      console.log(err);
-    })
-  }
-
-  const handleSave = () => {
-    if (id === 0) {
-      fetch(`https://yourtestapi.com/api/posts/`, {
-        method: "POST",
-        body: JSON.stringify({
-          "active": active,
-          "title": title,
-          "text": text,
-          "deleted_at": null,
-          "created_at": new Date(),
-          "updated_at": new Date(),
-          "url": url,
-          "image": "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?cs=srgb&dl=pexels-pixabay-45201.jpg&fm=jpg",
-        }),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      }).then(res => {
-        return res.json();
-      }).then(res => {
-        console.log(res);
-        getItemList();
-        setModal(false);
-        clearForm();
-      }).catch(err => {
-        console.log(err);
-      })
-    } else {
-      fetch(`https://yourtestapi.com/api/posts/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          "id": id,
-          "active": active,
-          "title": title,
-          "text": text,
-          "deleted_at": null,
-          "created_at": new Date(),
-          "updated_at": new Date(),
-          "url": url,
-          "image": "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?cs=srgb&dl=pexels-pixabay-45201.jpg&fm=jpg",
-        }),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      }).then(res => {
-        return res.json();
-      }).then(res => {
-        console.log(res);
-        getItemList();
-        setModal(false);
-        clearForm();
-      }).catch(err => {
-        console.log(err);
-      })
+  const getItemsList = async () => {
+    try {
+      const data = await getItems();
+      setList(data);
+    } catch (error) {
+      console.error(error);
     }
   }
+
+  const handleRemove = async (item: ListItem) => {
+    try {
+      await deleteItem(item);
+      getItemsList();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      const state = { active, title, text, url };
+      await saveItem(id, state)
+      setModal(false);
+      clearForm();
+      getItemsList();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  //methods
 
   const handleCreate = () => {
     setModal(true)
@@ -140,10 +82,12 @@ export default function App() {
   }
 
   const handleCloseModal = () => {
+    clearForm();
     setModal(false)
   }
 
-  //application view
+  console.log(id);
+  
 
   //item component
 
@@ -170,51 +114,45 @@ export default function App() {
     </View>
   ), [])
 
-  //modal window with update/create form component
-
-  const renderModalWindow = useCallback((modal: Boolean) => (
-    !modal ? null :
-      <Modal animationType="slide" transparent visible={Boolean(modal)}>
-        <SafeAreaView style={[tw`bg-red-200 h-3/5 top-[40%] rounded-t-2xl shadow-black`]}>
-          <View style={[tw`flex flex-row justify-between border-b p-2 items-center`]}>
-            <Text>New Item</Text>
-            <TouchableOpacity style={[tw`border-gray-600 rounded-2xl border-2 p-2`]} onPress={handleCloseModal}>
-              <Text style={[tw`text-gray-600 font-bold`]}>CLOSE</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={[tw`pl-2 pr-2 mt-5`]}>
-            <Text>Is Active</Text>
-            <TextInput keyboardType='numeric' maxLength={1} style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Is Active' value={active?.toString()} onChangeText={(text) => {
-              setActive(Number(text))
-            }} />
-
-            <Text>Title</Text>
-            <TextInput style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Title' value={title.toString()} onChangeText={(text) => {
-              setTitle(text)
-            }} />
-
-            <Text>Text</Text>
-            <TextInput style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Text' value={text.toString()} onChangeText={(text) => {
-              setText(text)
-            }} />
-
-            <Text>URL</Text>
-            <TextInput style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='URL' value={url.toString()} onChangeText={(text) => {
-              setUrl(text)
-            }} />
-            <TouchableOpacity style={[tw`border-pink-800 rounded-2xl border-2 pt-2 pb-2 pl-3 pr-2 w-16 mt-2 flex self-end`]} onPress={handleSave}>
-              <Text style={[tw`text-pink-800 font-bold`]}>SAVE</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </Modal>
-  ), [])
-
   //application view
 
   return (
     <SafeAreaView style={styles.droidSafeArea}>
-      {renderModalWindow(modal)}
+      {!modal ? null :
+        <Modal animationType="slide" transparent visible={Boolean(modal)}>
+          <SafeAreaView style={[tw`bg-red-200 h-3/5 top-[40%] rounded-t-2xl shadow-black`]}>
+            <View style={[tw`flex flex-row justify-between border-b p-2 items-center`]}>
+              <Text>New Item</Text>
+              <TouchableOpacity style={[tw`border-gray-600 rounded-2xl border-2 p-2`]} onPress={handleCloseModal}>
+                <Text style={[tw`text-gray-600 font-bold`]}>CLOSE</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[tw`pl-2 pr-2 mt-5`]}>
+              <Text>Is Active</Text>
+              <TextInput keyboardType='numeric' maxLength={1} style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Is Active' value={active?.toString()} onChangeText={(text) => {
+                setActive(Number(text))
+              }} />
+
+              <Text>Title</Text>
+              <TextInput style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Title' value={title.toString()} onChangeText={text =>
+                setTitle(text)
+              } />
+
+              <Text>Text</Text>
+              <TextInput style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Text' value={text.toString()} onChangeText={text =>
+                setText(text)
+              } />
+
+              <Text>URL</Text>
+              <TextInput style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='URL' value={url.toString()} onChangeText={text =>
+                setUrl(text)
+              } />
+              <TouchableOpacity style={[tw`border-pink-800 rounded-2xl border-2 pt-2 pb-2 pl-3 pr-2 w-16 mt-2 flex self-end`]} onPress={handleSave}>
+                <Text style={[tw`text-pink-800 font-bold`]}>SAVE</Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </Modal>}
       <View>
         <View style={[tw`flex flex-row justify-between border-b pb-1`]}>
           <Text style={[tw`p-2`]}>Items List: {list.length}</Text>
