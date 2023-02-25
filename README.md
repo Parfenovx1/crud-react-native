@@ -10,3 +10,8 @@ Application screenshots
 2)Create form:
 
 ![image](https://user-images.githubusercontent.com/58718910/221323593-7f7e5e05-b71b-4d3c-840c-ff53cf7de632.png)
+
+3)Update form:
+
+![image](https://user-images.githubusercontent.com/58718910/221323691-6a10c4eb-2a9e-4f7e-b061-2f3b18eafa18.png)
+
