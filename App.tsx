@@ -18,6 +18,7 @@ export default function App() {
   const [text, setText] = useState<String>('');
   const [title, setTitle] = useState<String>('');
   const [url, setUrl] = useState<String>('');
+  const [image, setImage] = useState<String>('');
 
   //useEffect to get list of items on initial render
 
@@ -47,7 +48,7 @@ export default function App() {
 
   const handleSave = async () => {
     try {
-      const state = { active, title, text, url };
+      const state = { active, title, text, url, image };
       await saveItem(id, state)
       setModal(false);
       clearForm();
@@ -69,6 +70,7 @@ export default function App() {
     setText(item.text);
     setTitle(item.title);
     setUrl(item.url);
+    setImage(item.image);
     setModal(true);
   }
 
@@ -79,15 +81,13 @@ export default function App() {
     setTitle('');
     setUrl('');
     setId(0);
+    setImage('')
   }
 
   const handleCloseModal = () => {
     clearForm();
     setModal(false)
   }
-
-  console.log(id);
-  
 
   //item component
 
@@ -120,7 +120,7 @@ export default function App() {
     <SafeAreaView style={styles.droidSafeArea}>
       {!modal ? null :
         <Modal animationType="slide" transparent visible={Boolean(modal)}>
-          <SafeAreaView style={[tw`bg-red-200 h-3/5 top-[40%] rounded-t-2xl shadow-black`]}>
+          <SafeAreaView style={[tw`bg-red-200 h-3/4 top-[30%] rounded-t-2xl shadow-black`]}>
             <View style={[tw`flex flex-row justify-between border-b p-2 items-center`]}>
               <Text>New Item</Text>
               <TouchableOpacity style={[tw`border-gray-600 rounded-2xl border-2 p-2`]} onPress={handleCloseModal}>
@@ -132,6 +132,11 @@ export default function App() {
               <TextInput keyboardType='numeric' maxLength={1} style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Is Active' value={active?.toString()} onChangeText={(text) => {
                 setActive(Number(text))
               }} />
+
+              <Text>Image</Text>
+              <TextInput style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Image https link' value={image.toString()} onChangeText={text =>
+                setImage(text)
+              } />
 
               <Text>Title</Text>
               <TextInput style={[tw`border-gray-600 rounded-xl border p-2 mb-1`]} placeholder='Title' value={title.toString()} onChangeText={text =>
@@ -161,7 +166,7 @@ export default function App() {
           </TouchableOpacity>
         </View>
         <FlatList
-          contentContainerStyle={[tw`pl-2 pr-2`]}
+          contentContainerStyle={[tw`pl-2 pr-2 pb-12`]}
           data={list}
           renderItem={renderItem}
           keyExtractor={({ id }: any) => id.toString()}

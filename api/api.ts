@@ -15,8 +15,6 @@ export const deleteItem = async (item: ListItem): Promise<void> => {
 }
 
 export const saveItem = async (itemID: Number, state: any): Promise<ListItem> => {
-    console.log(itemID, state);
-    
     if (itemID === 0) {
         const response = await fetch(`${API_URL}`, {
             method: 'POST',
@@ -32,14 +30,14 @@ export const saveItem = async (itemID: Number, state: any): Promise<ListItem> =>
                 "created_at": new Date(),
                 "updated_at": new Date(),
                 "url": state.url,
-                "image": "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?cs=srgb&dl=pexels-pixabay-45201.jpg&fm=jpg",
+                "image": state.image,
             }),
         });
         const data = await response.json();
         console.log(data);
         return data;
-        
-    }else {
+
+    } else {
         const response = await fetch(`${API_URL}${itemID}`, {
             method: 'PUT',
             headers: {
@@ -54,7 +52,7 @@ export const saveItem = async (itemID: Number, state: any): Promise<ListItem> =>
                 "created_at": new Date(),
                 "updated_at": new Date(),
                 "url": state.url,
-                "image": "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?cs=srgb&dl=pexels-pixabay-45201.jpg&fm=jpg",
+                "image": state.image,
             }),
         });
         const data = await response.json();
